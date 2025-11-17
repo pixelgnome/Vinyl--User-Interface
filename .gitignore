@@ -24,3 +24,6 @@ logs
 
 # Environment variables
 .env*
+
+# Mac file
+.DS_Store
