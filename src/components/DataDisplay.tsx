@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Card } from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Button } from './ui/button';
-import { Skeleton } from './ui/skeleton';
-import { Badge } from './ui/badge';
-import { Check, Copy, Save, Database, Disc3, Camera } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
-import type { VinylData } from '../App';
+import { useState, useEffect } from "react";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+import { Badge } from "./ui/badge";
+import { Check, Copy, Save, Database, Disc3, Camera } from "lucide-react";
+import { toast } from "sonner";
+import type { VinylData } from "../App";
 
 interface DataDisplayProps {
   data: VinylData | null;
@@ -15,10 +15,17 @@ interface DataDisplayProps {
   onDataUpdate: (data: VinylData) => void;
   onSave?: () => void;
   isSaving?: boolean;
-  dataSource?: 'ocr' | 'discogs' | null;
+  dataSource?: "ocr" | "discogs" | null;
 }
 
-export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving, dataSource }: DataDisplayProps) {
+export function DataDisplay({
+  data,
+  isProcessing,
+  onDataUpdate,
+  onSave,
+  isSaving,
+  dataSource,
+}: DataDisplayProps) {
   const [editedData, setEditedData] = useState<VinylData | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -37,7 +44,7 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
   const handleSave = () => {
     if (editedData) {
       onDataUpdate(editedData);
-      toast.success('Data saved successfully');
+      toast.success("Data saved successfully");
     }
   };
 
@@ -46,7 +53,7 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
       const text = `Artist: ${editedData.artistName}\nAlbum: ${editedData.albumName}\nSerial: ${editedData.serialNumber}\nMatrix/Runout: ${editedData.matrixRunout}`;
       navigator.clipboard.writeText(text);
       setCopied(true);
-      toast.success('Copied to clipboard');
+      toast.success("Copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -57,15 +64,15 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-foreground">Extracted Data</h2>
           {dataSource && (
-            <Badge 
-              variant="outline" 
+            <Badge
+              variant="outline"
               className={
-                dataSource === 'discogs' 
+                dataSource === "discogs"
                   ? "bg-green-900/40 border-green-700/50 text-green-300"
                   : "bg-primary/20 border-primary/50 text-primary"
               }
             >
-              {dataSource === 'discogs' ? (
+              {dataSource === "discogs" ? (
                 <>
                   <Disc3 className="w-3 h-3 mr-1" />
                   From Discogs
@@ -99,7 +106,9 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
               <Input
                 id="artist"
                 value={editedData.artistName}
-                onChange={(e) => handleInputChange('artistName', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("artistName", e.target.value)
+                }
                 className="bg-input-background border-border text-foreground focus:border-primary"
               />
             </div>
@@ -112,7 +121,7 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
               <Input
                 id="album"
                 value={editedData.albumName}
-                onChange={(e) => handleInputChange('albumName', e.target.value)}
+                onChange={(e) => handleInputChange("albumName", e.target.value)}
                 className="bg-input-background border-border text-foreground focus:border-primary"
               />
             </div>
@@ -125,7 +134,9 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
               <Input
                 id="serial"
                 value={editedData.serialNumber}
-                onChange={(e) => handleInputChange('serialNumber', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("serialNumber", e.target.value)
+                }
                 className="bg-input-background border-border text-foreground focus:border-primary"
               />
             </div>
@@ -138,7 +149,9 @@ export function DataDisplay({ data, isProcessing, onDataUpdate, onSave, isSaving
               <Input
                 id="matrix"
                 value={editedData.matrixRunout}
-                onChange={(e) => handleInputChange('matrixRunout', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("matrixRunout", e.target.value)
+                }
                 className="bg-input-background border-border text-foreground focus:border-primary"
               />
             </div>
