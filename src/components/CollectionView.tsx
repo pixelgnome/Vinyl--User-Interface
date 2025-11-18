@@ -126,6 +126,71 @@ export function CollectionView({ records, isLoading, onDelete, onRefresh }: Coll
                   </div>
                 )}
 
+                {/* Year & Country */}
+                {(record?.year || record?.country) && (
+                  <div className="flex gap-4">
+                    {record?.year && (
+                      <div className="flex-1">
+                        <p className="text-muted-foreground text-xs">Year</p>
+                        <p className="text-foreground text-sm">{record.year}</p>
+                      </div>
+                    )}
+                    {record?.country && (
+                      <div className="flex-1">
+                        <p className="text-muted-foreground text-xs">Country</p>
+                        <p className="text-foreground text-sm">{record.country}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Label & Format */}
+                {record?.label && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">Label</p>
+                    <p className="text-foreground text-sm">{record.label}</p>
+                  </div>
+                )}
+
+                {record?.format && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">Format</p>
+                    <p className="text-foreground text-sm">{record.format}</p>
+                  </div>
+                )}
+
+                {/* Genre & Style */}
+                {record?.genre && record.genre.length > 0 && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">Genre</p>
+                    <p className="text-foreground text-sm">{record.genre.join(', ')}</p>
+                  </div>
+                )}
+
+                {record?.style && record.style.length > 0 && (
+                  <div>
+                    <p className="text-muted-foreground text-xs">Style</p>
+                    <p className="text-foreground text-sm">{record.style.join(', ')}</p>
+                  </div>
+                )}
+
+                {/* Discogs Link */}
+                {record?.discogsUrl && (
+                  <div>
+                    <a
+                      href={record.discogsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-xs inline-flex items-center gap-1"
+                    >
+                      View on Discogs
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                )}
+
                 {/* Footer */}
                 <div className="pt-3 border-t border-border flex items-center justify-between">
                   <p className="text-muted-foreground text-xs">

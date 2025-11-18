@@ -50,7 +50,7 @@ export const api = {
   async createRecord(record: Partial<VinylData> & { imageUrl?: string }): Promise<VinylRecord> {
     const records = getStoredRecords();
     const now = Date.now();
-    
+
     const newRecord: VinylRecord = {
       id: `record_${now}_${Math.random().toString(36).substr(2, 9)}`,
       artistName: record.artistName || '',
@@ -58,6 +58,15 @@ export const api = {
       serialNumber: record.serialNumber || '',
       matrixRunout: record.matrixRunout || '',
       imageUrl: record.imageUrl || null,
+      // Optional Discogs fields
+      year: record.year,
+      country: record.country,
+      genre: record.genre,
+      style: record.style,
+      label: record.label,
+      format: record.format,
+      discogsId: record.discogsId,
+      discogsUrl: record.discogsUrl,
       createdAt: now,
       updatedAt: now,
     };

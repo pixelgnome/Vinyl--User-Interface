@@ -3,17 +3,29 @@ import { CameraUpload } from "./components/CameraUpload";
 import { DataDisplay } from "./components/DataDisplay";
 import { ManualEntry } from "./components/ManualEntry";
 import { CollectionView } from "./components/CollectionView";
+import { DiscogsSearch } from "./components/DiscogsSearch";
+import { DiscogsSettings } from "./components/DiscogsSettings";
 import { VinylLogo } from "./components/VinylLogo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { Camera, Edit3, Library } from "lucide-react";
+import { Camera, Edit3, Library, Search, Settings } from "lucide-react";
 import { api } from "./utils/api";
 import { toast } from "sonner";
+import type { DiscogsReleaseDetails } from "./utils/discogs";
 
 export interface VinylData {
   artistName: string;
   albumName: string;
   serialNumber: string;
   matrixRunout: string;
+  // Optional Discogs metadata
+  year?: number;
+  country?: string;
+  genre?: string[];
+  style?: string[];
+  label?: string;
+  format?: string;
+  discogsId?: number;
+  discogsUrl?: string;
 }
 
 export interface VinylRecord extends VinylData {
@@ -144,6 +156,44 @@ export default function App() {
     }
   };
 
+  const handleDiscogsSelect = async (release: DiscogsReleaseDetails) => {
+    setIsSaving(true);
+    try {
+      // Convert Discogs release to VinylData format
+      const vinylData: Partial<VinylData> & { imageUrl?: string } = {
+        artistName: release.artists?.map((a: { name: string }) => a.name).join(", ") || "",
+        albumName: release.title || "",
+        serialNumber: release.labels?.[0]?.catno || "",
+        matrixRunout: release.identifiers
+          ?.filter((id: { type: string; value: string }) => id.type.toLowerCase().includes("matrix") || id.type.toLowerCase().includes("runout"))
+          .map((id: { type: string; value: string }) => id.value)
+          .join(" // ") || "",
+        year: release.year,
+        country: release.country,
+        genre: release.genres,
+        style: release.styles,
+        label: release.labels?.[0]?.name,
+        format: release.formats?.map((f: { qty: string; name: string; descriptions?: string[] }) => `${f.qty} × ${f.name}${f.descriptions ? ` (${f.descriptions.join(", ")})` : ""}`).join(", "),
+        discogsId: release.id,
+        discogsUrl: release.uri,
+        imageUrl: release.images?.[0]?.uri || null,
+      };
+
+      await api.createRecord(vinylData);
+      toast.success("Vinyl record added from Discogs!");
+      setActiveTab("collection");
+    } catch (error) {
+      console.error("Error saving Discogs record:", error);
+      toast.error("Failed to save record");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleConfigureDiscogs = () => {
+    setActiveTab("settings");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -163,30 +213,46 @@ export default function App() {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 mb-8 bg-card border border-border">
+            <TabsList className="flex flex-wrap justify-center gap-2 w-full max-w-4xl mx-auto mb-8 bg-card border border-border p-2">
+              <TabsTrigger
+                value="discogs"
+                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Discogs</span>
+                <span className="sm:hidden">Search</span>
+              </TabsTrigger>
               <TabsTrigger
                 value="ocr"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Camera className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Upload & Scan</span>
-                <span className="sm:hidden">Upload</span>
+                <span className="hidden sm:inline">Upload</span>
+                <span className="sm:hidden">Scan</span>
               </TabsTrigger>
               <TabsTrigger
                 value="manual"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Edit3 className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Manual Entry</span>
-                <span className="sm:hidden">Manual</span>
+                <span className="hidden sm:inline">Manual</span>
+                <span className="sm:hidden">Entry</span>
               </TabsTrigger>
               <TabsTrigger
                 value="collection"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Library className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">My Collection</span>
-                <span className="sm:hidden">Collection</span>
+                <span className="hidden sm:inline">Collection</span>
+                <span className="sm:hidden">Library</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="settings"
+                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Settings</span>
+                <span className="sm:hidden">Config</span>
               </TabsTrigger>
             </TabsList>
 
@@ -274,6 +340,17 @@ export default function App() {
                 onDelete={handleDeleteRecord}
                 onRefresh={loadRecords}
               />
+            </TabsContent>
+
+            <TabsContent value="discogs" className="mt-0">
+              <DiscogsSearch
+                onSelectRelease={handleDiscogsSelect}
+                onConfigure={handleConfigureDiscogs}
+              />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-0">
+              <DiscogsSettings />
             </TabsContent>
           </Tabs>
         </div>
