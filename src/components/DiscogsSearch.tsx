@@ -19,36 +19,41 @@
 // 6. User can add the release to their collection
 // ============================================================================
 
-import { useState } from 'react';
-import { Card } from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Button } from './ui/button';
-import { Skeleton } from './ui/skeleton';
-import { Search, Plus, Info } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+import { Search, Plus, Info } from "lucide-react";
+import { toast } from "sonner";
 // IMPORT DISCOGS API: This is where we import the singleton API instance
-import { discogsAPI, DiscogsSearchResult, DiscogsReleaseDetails } from '../utils/discogs';
+import {
+  discogsAPI,
+  DiscogsSearchResult,
+  DiscogsReleaseDetails,
+} from "../utils/discogs";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
+} from "./ui/dialog";
 
 interface DiscogsSearchProps {
   onSelectRelease: (release: DiscogsReleaseDetails) => void;
 }
 
 export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [artistQuery, setArtistQuery] = useState('');
-  const [albumQuery, setAlbumQuery] = useState('');
-  const [barcodeQuery, setBarcodeQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [artistQuery, setArtistQuery] = useState("");
+  const [albumQuery, setAlbumQuery] = useState("");
+  const [barcodeQuery, setBarcodeQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<DiscogsSearchResult[]>([]);
-  const [selectedRelease, setSelectedRelease] = useState<DiscogsReleaseDetails | null>(null);
+  const [selectedRelease, setSelectedRelease] =
+    useState<DiscogsReleaseDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -62,7 +67,7 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
   // calls the appropriate Discogs API method
   const handleSearch = async () => {
     if (!isConfigured) {
-      toast.error('Please configure your Discogs API credentials first');
+      toast.error("Please configure your Discogs API credentials first");
       return;
     }
 
@@ -79,13 +84,17 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
         setResults(response.results || []);
 
         if (!response.results || response.results.length === 0) {
-          toast.info('No results found for this barcode. Try a different search.');
+          toast.info(
+            "No results found for this barcode. Try a different search."
+          );
         } else {
           toast.success(`Found ${response.pagination.items} results`);
         }
       } catch (error) {
-        console.error('Search error:', error);
-        toast.error(error instanceof Error ? error.message : 'Failed to search Discogs');
+        console.error("Search error:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to search Discogs"
+        );
       } finally {
         setIsSearching(false);
       }
@@ -94,10 +103,11 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
 
     // REGULAR SEARCH PATH
     // Combine quick search or artist + album fields into a single query
-    const query = searchQuery.trim() || `${artistQuery.trim()} ${albumQuery.trim()}`.trim();
+    const query =
+      searchQuery.trim() || `${artistQuery.trim()} ${albumQuery.trim()}`.trim();
 
     if (!query) {
-      toast.error('Please enter a search query');
+      toast.error("Please enter a search query");
       return;
     }
 
@@ -108,24 +118,26 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
       // API CALL #2: General search
       // This hits the /database/search endpoint with the query string
       // Filtered to 'release' type to only show vinyl releases
-      const response = await discogsAPI.search(query, 'release');
+      const response = await discogsAPI.search(query, "release");
       setResults(response.results || []);
 
       if (!response.results || response.results.length === 0) {
-        toast.info('No results found. Try a different search.');
+        toast.info("No results found. Try a different search.");
       } else {
         toast.success(`Found ${response.pagination.items} results`);
       }
     } catch (error) {
-      console.error('Search error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to search Discogs');
+      console.error("Search error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to search Discogs"
+      );
     } finally {
       setIsSearching(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -144,8 +156,8 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
       setSelectedRelease(details);
       setShowDetails(true);
     } catch (error) {
-      console.error('Error loading release details:', error);
-      toast.error('Failed to load release details');
+      console.error("Error loading release details:", error);
+      toast.error("Failed to load release details");
     } finally {
       setIsLoadingDetails(false);
     }
@@ -156,7 +168,7 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
       onSelectRelease(selectedRelease);
       setShowDetails(false);
       setSelectedRelease(null);
-      toast.success('Added to collection!');
+      toast.success("Added to collection!");
     }
   };
 
@@ -168,16 +180,21 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-yellow-200 font-medium mb-1">API Configuration Required</h4>
+              <h4 className="text-yellow-200 font-medium mb-1">
+                API Configuration Required
+              </h4>
               <p className="text-yellow-200/80 text-sm mb-3">
-                To search Discogs, you need to configure your API credentials in your browser's console or by using localStorage.
+                To search Discogs, you need to configure your API credentials in
+                your browser's console or by using localStorage.
               </p>
               <div className="bg-yellow-950/30 border border-yellow-700/30 rounded p-3 text-xs font-mono text-yellow-200/90">
                 <p className="mb-2">Open browser console and run:</p>
                 <code className="block">
                   localStorage.setItem('discogs_token', 'YOUR_TOKEN_HERE');
                 </code>
-                <p className="mt-2 text-yellow-200/70">Then refresh the page.</p>
+                <p className="mt-2 text-yellow-200/70">
+                  Then refresh the page.
+                </p>
               </div>
             </div>
           </div>
@@ -188,7 +205,7 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
       <Card className="bg-card border-border backdrop-blur-sm">
         <div className="p-6">
           <div className="mb-6">
-            <h2 className="text-foreground mb-2">Search Discogs Database</h2>
+            <h2 className="text-foreground mb-2">Manual Search</h2>
             <p className="text-muted-foreground text-sm">
               Search the Discogs database for vinyl records by artist and album
             </p>
@@ -216,7 +233,7 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                   className="bg-primary hover:bg-[var(--button-primary-hover)] text-primary-foreground"
                 >
                   <Search className="w-4 h-4 mr-2" />
-                  {isSearching ? 'Searching...' : 'Search'}
+                  {isSearching ? "Searching..." : "Search"}
                 </Button>
               </div>
             </div>
@@ -227,7 +244,9 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                 <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or search by fields</span>
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or search by fields
+                </span>
               </div>
             </div>
 
@@ -279,7 +298,8 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                 disabled={!isConfigured}
               />
               <p className="text-xs text-muted-foreground">
-                Search by barcode, UPC, EAN, or other release identifiers for exact matches
+                Search by barcode, UPC, EAN, or other release identifiers for
+                exact matches
               </p>
             </div>
           </div>
@@ -303,7 +323,9 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-foreground">Search Results</h3>
-            <p className="text-muted-foreground text-sm">{results.length} results</p>
+            <p className="text-muted-foreground text-sm">
+              {results.length} results
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -323,7 +345,9 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">No Image</span>
+                      <span className="text-muted-foreground text-sm">
+                        No Image
+                      </span>
                     </div>
                   )}
                 </div>
@@ -335,17 +359,15 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                   </h4>
 
                   <div className="space-y-1 text-sm text-muted-foreground">
-                    {result.year && (
-                      <p>Year: {result.year}</p>
-                    )}
-                    {result.country && (
-                      <p>Country: {result.country}</p>
-                    )}
+                    {result.year && <p>Year: {result.year}</p>}
+                    {result.country && <p>Country: {result.country}</p>}
                     {result.format && result.format.length > 0 && (
-                      <p>Format: {result.format.join(', ')}</p>
+                      <p>Format: {result.format.join(", ")}</p>
                     )}
                     {result.label && result.label.length > 0 && (
-                      <p className="line-clamp-1">Label: {result.label.join(', ')}</p>
+                      <p className="line-clamp-1">
+                        Label: {result.label.join(", ")}
+                      </p>
                     )}
                     {result.catno && (
                       <p className="font-mono text-xs">Cat#: {result.catno}</p>
@@ -355,7 +377,7 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                   <Button
                     size="sm"
                     className="w-full bg-primary hover:bg-[var(--button-primary-hover)] text-primary-foreground"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                       e.stopPropagation();
                       handleSelectResult(result);
                     }}
@@ -374,7 +396,9 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
         <DialogContent className="bg-card border-border max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Release Details</DialogTitle>
+            <DialogTitle className="text-foreground">
+              Release Details
+            </DialogTitle>
             <DialogDescription className="text-muted-foreground">
               Review the details before adding to your collection
             </DialogDescription>
@@ -403,17 +427,20 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
               <div className="space-y-3">
                 <div>
                   <p className="text-muted-foreground text-xs">Title</p>
-                  <p className="text-foreground font-medium">{selectedRelease.title}</p>
+                  <p className="text-foreground font-medium">
+                    {selectedRelease.title}
+                  </p>
                 </div>
 
-                {selectedRelease.artists && selectedRelease.artists.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Artist</p>
-                    <p className="text-foreground">
-                      {selectedRelease.artists.map((a) => a.name).join(', ')}
-                    </p>
-                  </div>
-                )}
+                {selectedRelease.artists &&
+                  selectedRelease.artists.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">Artist</p>
+                      <p className="text-foreground">
+                        {selectedRelease.artists.map((a) => a.name).join(", ")}
+                      </p>
+                    </div>
+                  )}
 
                 <div className="grid grid-cols-2 gap-3">
                   {selectedRelease.year && (
@@ -426,65 +453,87 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
                   {selectedRelease.country && (
                     <div>
                       <p className="text-muted-foreground text-xs">Country</p>
-                      <p className="text-foreground">{selectedRelease.country}</p>
+                      <p className="text-foreground">
+                        {selectedRelease.country}
+                      </p>
                     </div>
                   )}
                 </div>
 
-                {selectedRelease.labels && selectedRelease.labels.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Label & Catalog #</p>
-                    {selectedRelease.labels.map((label, idx) => (
-                      <p key={idx} className="text-foreground">
-                        {label.name} - <span className="font-mono text-sm">{label.catno}</span>
+                {selectedRelease.labels &&
+                  selectedRelease.labels.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">
+                        Label & Catalog #
                       </p>
-                    ))}
-                  </div>
-                )}
-
-                {selectedRelease.formats && selectedRelease.formats.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Format</p>
-                    {selectedRelease.formats.map((format, idx) => (
-                      <p key={idx} className="text-foreground">
-                        {format.qty} × {format.name}
-                        {format.descriptions && format.descriptions.length > 0 && (
-                          <span className="text-muted-foreground text-sm">
-                            {' '}
-                            ({format.descriptions.join(', ')})
+                      {selectedRelease.labels.map((label, idx) => (
+                        <p key={idx} className="text-foreground">
+                          {label.name} -{" "}
+                          <span className="font-mono text-sm">
+                            {label.catno}
                           </span>
-                        )}
-                      </p>
-                    ))}
-                  </div>
-                )}
-
-                {selectedRelease.genres && selectedRelease.genres.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Genre</p>
-                    <p className="text-foreground">{selectedRelease.genres.join(', ')}</p>
-                  </div>
-                )}
-
-                {selectedRelease.styles && selectedRelease.styles.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Style</p>
-                    <p className="text-foreground">{selectedRelease.styles.join(', ')}</p>
-                  </div>
-                )}
-
-                {selectedRelease.identifiers && selectedRelease.identifiers.length > 0 && (
-                  <div>
-                    <p className="text-muted-foreground text-xs">Identifiers</p>
-                    <div className="space-y-1">
-                      {selectedRelease.identifiers.map((id, idx) => (
-                        <p key={idx} className="text-foreground text-sm font-mono">
-                          {id.type}: {id.value}
                         </p>
                       ))}
                     </div>
-                  </div>
-                )}
+                  )}
+
+                {selectedRelease.formats &&
+                  selectedRelease.formats.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">Format</p>
+                      {selectedRelease.formats.map((format, idx) => (
+                        <p key={idx} className="text-foreground">
+                          {format.qty} × {format.name}
+                          {format.descriptions &&
+                            format.descriptions.length > 0 && (
+                              <span className="text-muted-foreground text-sm">
+                                {" "}
+                                ({format.descriptions.join(", ")})
+                              </span>
+                            )}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                {selectedRelease.genres &&
+                  selectedRelease.genres.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">Genre</p>
+                      <p className="text-foreground">
+                        {selectedRelease.genres.join(", ")}
+                      </p>
+                    </div>
+                  )}
+
+                {selectedRelease.styles &&
+                  selectedRelease.styles.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">Style</p>
+                      <p className="text-foreground">
+                        {selectedRelease.styles.join(", ")}
+                      </p>
+                    </div>
+                  )}
+
+                {selectedRelease.identifiers &&
+                  selectedRelease.identifiers.length > 0 && (
+                    <div>
+                      <p className="text-muted-foreground text-xs">
+                        Identifiers
+                      </p>
+                      <div className="space-y-1">
+                        {selectedRelease.identifiers.map((id, idx) => (
+                          <p
+                            key={idx}
+                            className="text-foreground text-sm font-mono"
+                          >
+                            {id.type}: {id.value}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Add Button */}

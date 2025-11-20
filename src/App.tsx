@@ -75,9 +75,7 @@ export default function App() {
       // For now, just clear the processing state
       setExtractedData(null);
       setIsProcessing(false);
-      toast.info(
-        "OCR processing complete - no text detected."
-      );
+      toast.info("OCR processing complete - no text detected.");
     }, 2000);
   };
 
@@ -134,19 +132,33 @@ export default function App() {
     try {
       // Convert Discogs release to VinylData format
       const vinylData: Partial<VinylData> & { imageUrl?: string } = {
-        artistName: release.artists?.map((a: { name: string }) => a.name).join(", ") || "",
+        artistName:
+          release.artists?.map((a: { name: string }) => a.name).join(", ") ||
+          "",
         albumName: release.title || "",
         serialNumber: release.labels?.[0]?.catno || "",
-        matrixRunout: release.identifiers
-          ?.filter((id: { type: string; value: string }) => id.type.toLowerCase().includes("matrix") || id.type.toLowerCase().includes("runout"))
-          .map((id: { type: string; value: string }) => id.value)
-          .join(" // ") || "",
+        matrixRunout:
+          release.identifiers
+            ?.filter(
+              (id: { type: string; value: string }) =>
+                id.type.toLowerCase().includes("matrix") ||
+                id.type.toLowerCase().includes("runout")
+            )
+            .map((id: { type: string; value: string }) => id.value)
+            .join(" // ") || "",
         year: release.year,
         country: release.country,
         genre: release.genres,
         style: release.styles,
         label: release.labels?.[0]?.name,
-        format: release.formats?.map((f: { qty: string; name: string; descriptions?: string[] }) => `${f.qty} × ${f.name}${f.descriptions ? ` (${f.descriptions.join(", ")})` : ""}`).join(", "),
+        format: release.formats
+          ?.map(
+            (f: { qty: string; name: string; descriptions?: string[] }) =>
+              `${f.qty} × ${f.name}${
+                f.descriptions ? ` (${f.descriptions.join(", ")})` : ""
+              }`
+          )
+          .join(", "),
         discogsId: release.id,
         discogsUrl: release.uri,
         imageUrl: release.images?.[0]?.uri || null,
@@ -174,7 +186,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Content and Tabs */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <Tabs
@@ -188,7 +200,7 @@ export default function App() {
                 className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Search className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Discogs</span>
+                <span className="hidden sm:inline">Manual Search</span>
                 <span className="sm:hidden">Search</span>
               </TabsTrigger>
               <TabsTrigger
@@ -196,7 +208,7 @@ export default function App() {
                 className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Camera className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Upload</span>
+                <span className="hidden sm:inline">Image Upload</span>
                 <span className="sm:hidden">Scan</span>
               </TabsTrigger>
               <TabsTrigger
@@ -204,8 +216,8 @@ export default function App() {
                 className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Library className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Collection</span>
-                <span className="sm:hidden">Library</span>
+                <span className="hidden sm:inline">Your Collection</span>
+                <span className="sm:hidden">Collection</span>
               </TabsTrigger>
             </TabsList>
 
@@ -278,9 +290,7 @@ export default function App() {
             </TabsContent>
 
             <TabsContent value="discogs" className="mt-0">
-              <DiscogsSearch
-                onSelectRelease={handleDiscogsSelect}
-              />
+              <DiscogsSearch onSelectRelease={handleDiscogsSelect} />
             </TabsContent>
           </Tabs>
         </div>
