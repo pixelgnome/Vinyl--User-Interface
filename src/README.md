@@ -5,7 +5,7 @@ A modern web application for managing your vinyl record collection with OCR text
 ## Features
 
 - 📸 **Upload & Scan** - Upload photos of vinyl labels with simulated OCR text extraction
-- ✍️ **Manual Entry** - Manually enter vinyl record details
+- 🔍 **Discogs Search** - Search the Discogs database for vinyl records
 - 📚 **Collection View** - Browse and manage your complete vinyl collection
 - 💾 **localStorage** - All data persists locally in your browser
 - 🎨 **Dark Vinyl Theme** - Beautiful dark interface with Helvetica Neue typography
@@ -70,10 +70,11 @@ vinyl-dollars/
 │   │   ├── CameraUpload.tsx
 │   │   ├── CollectionView.tsx
 │   │   ├── DataDisplay.tsx
-│   │   ├── ManualEntry.tsx
+│   │   ├── DiscogsSearch.tsx
 │   │   └── VinylLogo.tsx
 │   ├── utils/
-│   │   └── api.ts         # localStorage API
+│   │   ├── api.ts         # localStorage API
+│   │   └── discogs.ts     # Discogs API client
 │   ├── styles/
 │   │   └── globals.css    # Global styles & Tailwind
 │   ├── App.tsx            # Main app component
@@ -88,15 +89,17 @@ vinyl-dollars/
 
 ## Usage
 
+### Discogs Search
+1. Configure your Discogs API credentials via browser console (instructions shown in the app)
+2. Search for vinyl records by artist, album, or barcode
+3. View detailed release information
+4. Add records directly to your collection
+
 ### Upload & Scan Mode
 1. Click or drag an image of a vinyl label
 2. Wait for simulated OCR processing (2 seconds)
 3. Edit the extracted data as needed
 4. Save to your collection
-
-### Manual Entry Mode
-1. Fill in the vinyl record details manually
-2. Save to your collection
 
 ### Collection View
 1. Browse all your saved records

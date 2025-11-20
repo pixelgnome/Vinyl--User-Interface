@@ -37,7 +37,7 @@ Move these files from the root to `src/`:
 - `/components/CameraUpload.tsx` → `/src/components/CameraUpload.tsx`
 - `/components/CollectionView.tsx` → `/src/components/CollectionView.tsx`
 - `/components/DataDisplay.tsx` → `/src/components/DataDisplay.tsx`
-- `/components/ManualEntry.tsx` → `/src/components/ManualEntry.tsx`
+- `/components/DiscogsSearch.tsx` → `/src/components/DiscogsSearch.tsx`
 - `/components/VinylLogo.tsx` → `/src/components/VinylLogo.tsx`
 
 **UI Components** (move from `/components/ui/` to `/src/components/ui/`):

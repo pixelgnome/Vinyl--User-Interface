@@ -132,9 +132,10 @@ class DiscogsAPI {
   constructor() {
     // Initialize with credentials from .env file (if available)
     // These can be overridden by calling setToken() or setConsumerCredentials()
-    this.token = import.meta.env.VITE_DISCOGS_TOKEN || null;
-    this.consumerKey = import.meta.env.VITE_DISCOGS_CONSUMER_KEY || null;
-    this.consumerSecret = import.meta.env.VITE_DISCOGS_CONSUMER_SECRET || null;
+    const env = (import.meta as any).env;
+    this.token = env?.VITE_DISCOGS_TOKEN || null;
+    this.consumerKey = env?.VITE_DISCOGS_CONSUMER_KEY || null;
+    this.consumerSecret = env?.VITE_DISCOGS_CONSUMER_SECRET || null;
   }
 
   /**

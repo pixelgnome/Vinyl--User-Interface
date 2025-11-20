@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { CameraUpload } from "./components/CameraUpload";
 import { DataDisplay } from "./components/DataDisplay";
-import { ManualEntry } from "./components/ManualEntry";
 import { CollectionView } from "./components/CollectionView";
 import { DiscogsSearch } from "./components/DiscogsSearch";
-import { DiscogsSettings } from "./components/DiscogsSettings";
 import { VinylLogo } from "./components/VinylLogo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { Camera, Edit3, Library, Search, Settings } from "lucide-react";
+import { Camera, Library, Search } from "lucide-react";
 import { api } from "./utils/api";
 import { toast } from "sonner";
 import type { DiscogsReleaseDetails } from "./utils/discogs";
@@ -37,19 +35,13 @@ export interface VinylRecord extends VinylData {
 
 export default function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [extractedData, setExtractedData] = useState<VinylData | null>({
-    artistName: "Led Zeppelin",
-    albumName: "Led Zeppelin II",
-    serialNumber: "SD 8236 / ATL 40 037",
-    matrixRunout:
-      "SD 8236-A RL SS // ATLANTIC // ⊗ // STERLING // Robert Ludwig // 1969",
-  });
+  const [extractedData, setExtractedData] = useState<VinylData | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("ocr");
   const [isSaving, setIsSaving] = useState(false);
   const [records, setRecords] = useState<VinylRecord[]>([]);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
-  const [dataSource, setDataSource] = useState<"ocr" | "manual" | null>("ocr");
+  const [dataSource, setDataSource] = useState<"ocr" | null>("ocr");
 
   // Load records when switching to collection tab
   useEffect(() => {
@@ -79,17 +71,12 @@ export default function App() {
 
     // Simulate OCR processing
     setTimeout(() => {
-      // Mock extracted data with detailed realistic vinyl information
-      setExtractedData({
-        artistName: "Led Zeppelin",
-        albumName: "Led Zeppelin II",
-        serialNumber: "SD 8236 / ATL 40 037",
-        matrixRunout:
-          "SD 8236-A RL SS // ATLANTIC // ⊗ // STERLING // Robert Ludwig // 1969",
-      });
+      // OCR processing would extract data here
+      // For now, just clear the processing state
+      setExtractedData(null);
       setIsProcessing(false);
       toast.info(
-        "OCR processing simulated - please edit the extracted data as needed"
+        "OCR processing complete - no text detected."
       );
     }, 2000);
   };
@@ -122,20 +109,6 @@ export default function App() {
       handleReset();
 
       // Switch to collection tab
-      setActiveTab("collection");
-    } catch (error) {
-      console.error("Error saving record:", error);
-      toast.error("Failed to save record");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleManualSubmit = async (data: VinylData) => {
-    setIsSaving(true);
-    try {
-      await api.createRecord(data);
-      toast.success("Vinyl record saved to collection!");
       setActiveTab("collection");
     } catch (error) {
       console.error("Error saving record:", error);
@@ -190,10 +163,6 @@ export default function App() {
     }
   };
 
-  const handleConfigureDiscogs = () => {
-    setActiveTab("settings");
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -231,28 +200,12 @@ export default function App() {
                 <span className="sm:hidden">Scan</span>
               </TabsTrigger>
               <TabsTrigger
-                value="manual"
-                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
-              >
-                <Edit3 className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Manual</span>
-                <span className="sm:hidden">Entry</span>
-              </TabsTrigger>
-              <TabsTrigger
                 value="collection"
                 className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
               >
                 <Library className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Collection</span>
                 <span className="sm:hidden">Library</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="settings"
-                className="flex-1 min-w-[120px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Settings</span>
-                <span className="sm:hidden">Config</span>
               </TabsTrigger>
             </TabsList>
 
@@ -303,15 +256,6 @@ export default function App() {
                         <span className="text-primary shrink-0">2.</span>
                         <p>
                           <strong className="text-foreground">
-                            Manual Entry:
-                          </strong>{" "}
-                          Use the Manual Entry tab to type in details yourself
-                        </p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <span className="text-primary shrink-0">3.</span>
-                        <p>
-                          <strong className="text-foreground">
                             Your Collection:
                           </strong>{" "}
                           All records are saved locally in your browser's
@@ -322,15 +266,6 @@ export default function App() {
                   </div>
                 </div>
               )}
-            </TabsContent>
-
-            <TabsContent value="manual" className="mt-0">
-              <div className="max-w-2xl mx-auto">
-                <ManualEntry
-                  onSubmit={handleManualSubmit}
-                  isSaving={isSaving}
-                />
-              </div>
             </TabsContent>
 
             <TabsContent value="collection" className="mt-0">
@@ -345,12 +280,7 @@ export default function App() {
             <TabsContent value="discogs" className="mt-0">
               <DiscogsSearch
                 onSelectRelease={handleDiscogsSelect}
-                onConfigure={handleConfigureDiscogs}
               />
-            </TabsContent>
-
-            <TabsContent value="settings" className="mt-0">
-              <DiscogsSettings />
             </TabsContent>
           </Tabs>
         </div>

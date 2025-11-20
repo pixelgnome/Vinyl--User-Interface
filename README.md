@@ -6,7 +6,6 @@ A modern vinyl record collection manager with Discogs API integration.
 
 - **Discogs Integration**: Search the vast Discogs database and add records with complete metadata
 - **OCR Upload**: Upload photos of vinyl labels for text extraction (simulated)
-- **Manual Entry**: Manually add vinyl records to your collection
 - **Collection View**: Browse and manage your vinyl collection
 - **Local Storage**: All data stored locally in your browser
 
@@ -55,11 +54,12 @@ You can add your credentials in two ways:
    VITE_DISCOGS_CONSUMER_SECRET=your_consumer_secret_here
    ```
 
-**B. Via Settings Tab:**
+**B. Via Browser Console:**
 
 1. Run the app
-2. Click on the "Settings" tab
-3. Enter your credentials and click "Save Configuration"
+2. Open browser developer console (F12)
+3. Run: `localStorage.setItem('discogs_token', 'YOUR_TOKEN_HERE');`
+4. Refresh the page
 
 ### 3. Run the Development Server
 
@@ -76,8 +76,6 @@ The app will be available at `http://localhost:5173` (or another port if 5173 is
 1. **Discogs Search** (recommended): Search the Discogs database for your vinyl and add it with complete metadata including artwork, label info, catalog numbers, and more.
 
 2. **Upload & Scan**: Take a photo of your vinyl label. The app will simulate OCR text extraction (currently mock data).
-
-3. **Manual Entry**: Type in the details yourself for complete control.
 
 ### Managing Your Collection
 

@@ -25,7 +25,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { Skeleton } from './ui/skeleton';
-import { Search, Plus, Info, Settings } from 'lucide-react';
+import { Search, Plus, Info } from 'lucide-react';
 import { toast } from 'sonner';
 // IMPORT DISCOGS API: This is where we import the singleton API instance
 import { discogsAPI, DiscogsSearchResult, DiscogsReleaseDetails } from '../utils/discogs';
@@ -39,10 +39,9 @@ import {
 
 interface DiscogsSearchProps {
   onSelectRelease: (release: DiscogsReleaseDetails) => void;
-  onConfigure?: () => void;
 }
 
-export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchProps) {
+export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [artistQuery, setArtistQuery] = useState('');
   const [albumQuery, setAlbumQuery] = useState('');
@@ -64,7 +63,6 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
   const handleSearch = async () => {
     if (!isConfigured) {
       toast.error('Please configure your Discogs API credentials first');
-      onConfigure?.();
       return;
     }
 
@@ -172,17 +170,15 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
             <div className="flex-1">
               <h4 className="text-yellow-200 font-medium mb-1">API Configuration Required</h4>
               <p className="text-yellow-200/80 text-sm mb-3">
-                To search Discogs, you need to configure your API credentials.
+                To search Discogs, you need to configure your API credentials in your browser's console or by using localStorage.
               </p>
-              <Button
-                onClick={onConfigure}
-                variant="outline"
-                size="sm"
-                className="border-yellow-700 text-yellow-200 hover:bg-yellow-900/20"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Configure API
-              </Button>
+              <div className="bg-yellow-950/30 border border-yellow-700/30 rounded p-3 text-xs font-mono text-yellow-200/90">
+                <p className="mb-2">Open browser console and run:</p>
+                <code className="block">
+                  localStorage.setItem('discogs_token', 'YOUR_TOKEN_HERE');
+                </code>
+                <p className="mt-2 text-yellow-200/70">Then refresh the page.</p>
+              </div>
             </div>
           </div>
         </Card>
