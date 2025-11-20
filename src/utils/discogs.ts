@@ -1,6 +1,23 @@
-// Discogs API integration
-// API Documentation: https://www.discogs.com/developers
+// ============================================================================
+// DISCOGS API CLIENT - Main implementation file
+// ============================================================================
+// This file contains the complete Discogs API integration for searching and
+// retrieving vinyl record information from the Discogs database.
+//
+// Official API Documentation: https://www.discogs.com/developers
+//
+// ARCHITECTURE:
+// - TypeScript interfaces define the shape of API responses
+// - DiscogsAPI class handles all HTTP requests to Discogs
+// - Singleton instance (discogsAPI) is exported for use throughout the app
+// ============================================================================
 
+// ----------------------------------------------------------------------------
+// TYPE DEFINITIONS - Discogs API Response Interfaces
+// ----------------------------------------------------------------------------
+// These interfaces map directly to the JSON responses from Discogs API endpoints
+
+// Represents a basic release record (used in search results and collections)
 export interface DiscogsRelease {
   id: number;
   title: string;
@@ -19,6 +36,7 @@ export interface DiscogsRelease {
   uri?: string;
 }
 
+// Represents a single search result item returned from the /database/search endpoint
 export interface DiscogsSearchResult {
   id: number;
   type: 'release' | 'master' | 'artist' | 'label';
@@ -36,6 +54,8 @@ export interface DiscogsSearchResult {
   resource_url: string;
 }
 
+// Full response structure from the Discogs search API
+// Includes results array and pagination metadata
 export interface DiscogsSearchResponse {
   results: DiscogsSearchResult[];
   pagination: {
@@ -50,6 +70,8 @@ export interface DiscogsSearchResponse {
   };
 }
 
+// Detailed release information returned from the /releases/{id} endpoint
+// Contains complete metadata including tracklist, images, and identifiers
 export interface DiscogsReleaseDetails {
   id: number;
   title: string;
@@ -94,6 +116,13 @@ export interface DiscogsReleaseDetails {
   resource_url?: string;
 }
 
+// ----------------------------------------------------------------------------
+// DISCOGS API CLIENT CLASS
+// ----------------------------------------------------------------------------
+// Main class that handles all communication with the Discogs API
+// Supports two authentication methods:
+//   1. Personal Access Token (recommended for personal use)
+//   2. Consumer Key/Secret (for OAuth applications)
 class DiscogsAPI {
   private baseUrl = 'https://api.discogs.com';
   private token: string | null = null;
@@ -101,7 +130,8 @@ class DiscogsAPI {
   private consumerSecret: string | null = null;
 
   constructor() {
-    // Try to get credentials from environment variables
+    // Initialize with credentials from .env file (if available)
+    // These can be overridden by calling setToken() or setConsumerCredentials()
     this.token = import.meta.env.VITE_DISCOGS_TOKEN || null;
     this.consumerKey = import.meta.env.VITE_DISCOGS_CONSUMER_KEY || null;
     this.consumerSecret = import.meta.env.VITE_DISCOGS_CONSUMER_SECRET || null;
@@ -127,7 +157,9 @@ class DiscogsAPI {
   }
 
   /**
-   * Get authentication headers
+   * Get authentication headers for API requests
+   * Adds Authorization header if using Personal Access Token
+   * (Consumer Key/Secret are added as URL params instead)
    */
   private getAuthHeaders(): HeadersInit {
     const headers: HeadersInit = {
@@ -143,7 +175,12 @@ class DiscogsAPI {
   }
 
   /**
-   * Make a request to the Discogs API
+   * Core HTTP request method - handles all API communication
+   *
+   * @param endpoint - API endpoint path (e.g., '/database/search')
+   * @param params - Optional query parameters
+   * @returns Parsed JSON response
+   * @throws Error if API returns non-200 status or request fails
    */
   private async request<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     if (!this.isConfigured()) {
@@ -189,8 +226,19 @@ class DiscogsAPI {
     }
   }
 
+  // ------------------------------------------------------------------------
+  // PUBLIC API METHODS
+  // ------------------------------------------------------------------------
+  // These methods are called by components to interact with Discogs
+
   /**
-   * Search for releases, artists, labels, etc.
+   * Search the Discogs database (uses /database/search endpoint)
+   *
+   * @param query - Search query string
+   * @param type - Filter by type (release, master, artist, label)
+   * @param page - Page number for pagination
+   * @param perPage - Results per page
+   * @returns Search results with pagination metadata
    */
   async search(
     query: string,
@@ -220,7 +268,11 @@ class DiscogsAPI {
   }
 
   /**
-   * Get detailed information about a specific release
+   * Get detailed information about a specific release (uses /releases/{id} endpoint)
+   * Returns full metadata including tracklist, images, formats, and identifiers
+   *
+   * @param releaseId - The Discogs release ID
+   * @returns Complete release details
    */
   async getRelease(releaseId: number): Promise<DiscogsReleaseDetails> {
     return this.request<DiscogsReleaseDetails>(`/releases/${releaseId}`);
@@ -234,7 +286,11 @@ class DiscogsAPI {
   }
 
   /**
-   * Search by barcode
+   * Search by barcode/UPC/EAN for exact matches
+   * Useful for scanning physical vinyl barcodes
+   *
+   * @param barcode - Barcode, UPC, or EAN number
+   * @returns Search results matching the barcode
    */
   async searchByBarcode(barcode: string): Promise<DiscogsSearchResponse> {
     return this.request<DiscogsSearchResponse>('/database/search', {
@@ -244,7 +300,12 @@ class DiscogsAPI {
   }
 
   /**
-   * Search by catalog number
+   * Search by catalog number (the label's unique identifier for a release)
+   * Found on the spine or back of vinyl records
+   *
+   * @param catno - Catalog number (e.g., "MOVLP123")
+   * @param page - Page number for pagination
+   * @returns Search results matching the catalog number
    */
   async searchByCatalogNumber(catno: string, page: number = 1): Promise<DiscogsSearchResponse> {
     return this.request<DiscogsSearchResponse>('/database/search', {
@@ -255,5 +316,10 @@ class DiscogsAPI {
   }
 }
 
-// Export a singleton instance
+// ----------------------------------------------------------------------------
+// SINGLETON EXPORT
+// ----------------------------------------------------------------------------
+// Export a single shared instance of the API client
+// This instance is imported and used by components throughout the app
+// Usage: import { discogsAPI } from '../utils/discogs';
 export const discogsAPI = new DiscogsAPI();

@@ -1,3 +1,24 @@
+// ============================================================================
+// DISCOGS SETTINGS COMPONENT
+// ============================================================================
+// This component provides the UI for configuring Discogs API credentials.
+// It handles storing credentials in localStorage and applying them to the
+// discogsAPI singleton instance.
+//
+// WHERE THE DISCOGS API IS CONFIGURED:
+// - Line ~34: discogsAPI.setToken() - Apply saved token from localStorage
+// - Line ~36: discogsAPI.setConsumerCredentials() - Apply saved key/secret
+// - Line ~54: discogsAPI.setToken() - Save new token
+// - Line ~63: discogsAPI.setConsumerCredentials() - Save new credentials
+//
+// AUTHENTICATION FLOW:
+// 1. On mount, load saved credentials from localStorage
+// 2. Apply credentials to discogsAPI instance using setter methods
+// 3. User can update credentials via form
+// 4. New credentials are saved to localStorage and applied to API
+// 5. API instance now authenticates all requests with these credentials
+// ============================================================================
+
 import { useState, useEffect } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -5,8 +26,10 @@ import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { Save, Eye, EyeOff, ExternalLink, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+// IMPORT DISCOGS API: Import the singleton to configure credentials
 import { discogsAPI } from '../utils/discogs';
 
+// LocalStorage keys for persisting credentials
 const STORAGE_KEY_TOKEN = 'discogs_token';
 const STORAGE_KEY_CONSUMER_KEY = 'discogs_consumer_key';
 const STORAGE_KEY_CONSUMER_SECRET = 'discogs_consumer_secret';
@@ -19,7 +42,10 @@ export function DiscogsSettings() {
   const [showSecret, setShowSecret] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Load saved credentials on mount
+  // --------------------------------------------------------------------------
+  // LOAD AND APPLY CREDENTIALS ON MOUNT
+  // --------------------------------------------------------------------------
+  // This effect runs once when component mounts to restore saved credentials
   useEffect(() => {
     const savedToken = localStorage.getItem(STORAGE_KEY_TOKEN) || '';
     const savedKey = localStorage.getItem(STORAGE_KEY_CONSUMER_KEY) || '';
@@ -29,14 +55,21 @@ export function DiscogsSettings() {
     setConsumerKey(savedKey);
     setConsumerSecret(savedSecret);
 
-    // Apply to API client
+    // CONFIGURE API: Apply saved credentials to the discogsAPI singleton
+    // This makes the API ready to authenticate requests
     if (savedToken) {
+      // Use Personal Access Token if available
       discogsAPI.setToken(savedToken);
     } else if (savedKey && savedSecret) {
+      // Fall back to Consumer Key/Secret
       discogsAPI.setConsumerCredentials(savedKey, savedSecret);
     }
   }, []);
 
+  // --------------------------------------------------------------------------
+  // SAVE CREDENTIALS HANDLER
+  // --------------------------------------------------------------------------
+  // Saves credentials to localStorage and applies them to the API client
   const handleSave = () => {
     setIsSaving(true);
 
@@ -48,18 +81,23 @@ export function DiscogsSettings() {
         return;
       }
 
-      // Save to localStorage
+      // Save Personal Access Token
       if (token.trim()) {
+        // Store in browser localStorage for persistence
         localStorage.setItem(STORAGE_KEY_TOKEN, token.trim());
+        // CONFIGURE API: Apply token to the API client immediately
         discogsAPI.setToken(token.trim());
         toast.success('Personal Access Token saved successfully!');
       } else {
         localStorage.removeItem(STORAGE_KEY_TOKEN);
       }
 
+      // Save Consumer Key/Secret
       if (consumerKey.trim() && consumerSecret.trim()) {
+        // Store both key and secret in localStorage
         localStorage.setItem(STORAGE_KEY_CONSUMER_KEY, consumerKey.trim());
         localStorage.setItem(STORAGE_KEY_CONSUMER_SECRET, consumerSecret.trim());
+        // CONFIGURE API: Apply credentials to the API client immediately
         discogsAPI.setConsumerCredentials(consumerKey.trim(), consumerSecret.trim());
         toast.success('Consumer credentials saved successfully!');
       } else {
@@ -86,6 +124,7 @@ export function DiscogsSettings() {
     toast.info('Credentials cleared');
   };
 
+  // Check if API is currently configured and ready to use
   const isConfigured = discogsAPI.isConfigured();
 
   return (

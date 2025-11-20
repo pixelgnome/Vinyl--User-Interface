@@ -1,3 +1,24 @@
+// ============================================================================
+// DISCOGS SEARCH COMPONENT
+// ============================================================================
+// This component provides the UI for searching the Discogs database and
+// viewing detailed release information. It's the main interface between
+// the user and the Discogs API.
+//
+// WHERE THE DISCOGS API IS CALLED:
+// - Line ~49: discogsAPI.searchByBarcode() - Search by barcode
+// - Line ~78: discogsAPI.search() - General search
+// - Line ~103: discogsAPI.getRelease() - Get full release details
+//
+// COMPONENT FLOW:
+// 1. User enters search query (artist/album or barcode)
+// 2. handleSearch() calls appropriate Discogs API method
+// 3. Search results are displayed in a grid
+// 4. User clicks result to view details
+// 5. handleSelectResult() fetches full details via getRelease()
+// 6. User can add the release to their collection
+// ============================================================================
+
 import { useState } from 'react';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -6,6 +27,7 @@ import { Button } from './ui/button';
 import { Skeleton } from './ui/skeleton';
 import { Search, Plus, Info, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+// IMPORT DISCOGS API: This is where we import the singleton API instance
 import { discogsAPI, DiscogsSearchResult, DiscogsReleaseDetails } from '../utils/discogs';
 import {
   Dialog,
@@ -31,8 +53,14 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
+  // Check if Discogs API credentials are configured
   const isConfigured = discogsAPI.isConfigured();
 
+  // --------------------------------------------------------------------------
+  // SEARCH HANDLER - Main function that calls Discogs API
+  // --------------------------------------------------------------------------
+  // This function determines the search type (barcode vs regular) and
+  // calls the appropriate Discogs API method
   const handleSearch = async () => {
     if (!isConfigured) {
       toast.error('Please configure your Discogs API credentials first');
@@ -40,12 +68,15 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
       return;
     }
 
-    // Check if barcode search
+    // BARCODE SEARCH PATH
+    // If barcode field has content, use the barcode search API
     if (barcodeQuery.trim()) {
       setIsSearching(true);
       setResults([]);
 
       try {
+        // API CALL #1: Search by barcode
+        // This hits the /database/search endpoint with barcode parameter
         const response = await discogsAPI.searchByBarcode(barcodeQuery.trim());
         setResults(response.results || []);
 
@@ -63,7 +94,8 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
       return;
     }
 
-    // Regular search
+    // REGULAR SEARCH PATH
+    // Combine quick search or artist + album fields into a single query
     const query = searchQuery.trim() || `${artistQuery.trim()} ${albumQuery.trim()}`.trim();
 
     if (!query) {
@@ -75,6 +107,9 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
     setResults([]);
 
     try {
+      // API CALL #2: General search
+      // This hits the /database/search endpoint with the query string
+      // Filtered to 'release' type to only show vinyl releases
       const response = await discogsAPI.search(query, 'release');
       setResults(response.results || []);
 
@@ -97,9 +132,16 @@ export function DiscogsSearch({ onSelectRelease, onConfigure }: DiscogsSearchPro
     }
   };
 
+  // --------------------------------------------------------------------------
+  // RELEASE DETAILS HANDLER
+  // --------------------------------------------------------------------------
+  // When user clicks a search result, fetch complete release details
   const handleSelectResult = async (result: DiscogsSearchResult) => {
     setIsLoadingDetails(true);
     try {
+      // API CALL #3: Get detailed release information
+      // This hits the /releases/{id} endpoint to get full metadata
+      // including tracklist, images, identifiers, etc.
       const details = await discogsAPI.getRelease(result.id);
       setSelectedRelease(details);
       setShowDetails(true);

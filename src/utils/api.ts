@@ -1,3 +1,20 @@
+// ============================================================================
+// LOCAL STORAGE API
+// ============================================================================
+// This file handles storing vinyl records in the browser's localStorage.
+// It's separate from the Discogs API integration.
+//
+// DISCOGS INTEGRATION:
+// When a user selects a release from Discogs (via DiscogsSearch component),
+// the Discogs data is passed to createRecord() and stored with these fields:
+// - discogsId: The Discogs release ID
+// - discogsUrl: Link to the release on Discogs
+// - year, country, genre, style, label, format: Metadata from Discogs
+//
+// See: src/components/DiscogsSearch.tsx (line ~116) where onSelectRelease
+// is called with the Discogs data, which gets passed to createRecord()
+// ============================================================================
+
 import type { VinylData } from '../App';
 
 interface VinylRecord extends VinylData {
@@ -58,7 +75,8 @@ export const api = {
       serialNumber: record.serialNumber || '',
       matrixRunout: record.matrixRunout || '',
       imageUrl: record.imageUrl || null,
-      // Optional Discogs fields
+      // DISCOGS DATA: These optional fields come from Discogs API
+      // They're populated when user adds a vinyl from Discogs search results
       year: record.year,
       country: record.country,
       genre: record.genre,
