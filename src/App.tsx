@@ -98,7 +98,7 @@ export default function App() {
       // Create record with image
       await api.createRecord({
         ...extractedData,
-        imageUrl: uploadedImage,
+        imageUrl: uploadedImage ?? undefined,
       });
 
       toast.success("Vinyl record saved to collection!");
@@ -161,7 +161,7 @@ export default function App() {
           .join(", "),
         discogsId: release.id,
         discogsUrl: release.uri,
-        imageUrl: release.images?.[0]?.uri || null,
+        imageUrl: release.images?.[0]?.uri ?? undefined,
       };
 
       await api.createRecord(vinylData);
