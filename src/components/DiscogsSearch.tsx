@@ -56,9 +56,23 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
     useState<DiscogsReleaseDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [tokenInput, setTokenInput] = useState("");
+  const [showTokenInput, setShowTokenInput] = useState(false);
 
   // Check if Discogs API credentials are configured
-  const isConfigured = discogsAPI.isConfigured();
+  const [isConfigured, setIsConfigured] = useState(discogsAPI.isConfigured());
+
+  const handleSaveToken = () => {
+    if (tokenInput.trim()) {
+      localStorage.setItem('discogs_token', tokenInput.trim());
+      discogsAPI.setToken(tokenInput.trim());
+      setIsConfigured(true);
+      setShowTokenInput(false);
+      toast.success("Discogs API token saved successfully!");
+    } else {
+      toast.error("Please enter a valid token");
+    }
+  };
 
   // --------------------------------------------------------------------------
   // SEARCH HANDLER - Main function that calls Discogs API
@@ -180,22 +194,51 @@ export function DiscogsSearch({ onSelectRelease }: DiscogsSearchProps) {
           <div className="flex items-start gap-3">
             <Info className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-yellow-200 font-medium mb-1">
+              <h4 className="text-yellow-200 font-medium mb-2">
                 API Configuration Required
               </h4>
               <p className="text-yellow-200/80 text-sm mb-3">
-                To search Discogs, you need to configure your API credentials in
-                your browser's console or by using localStorage.
+                To search Discogs, you need to configure your API token.{" "}
+                <a
+                  href="https://www.discogs.com/settings/developers"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-yellow-100"
+                >
+                  Get your token here
+                </a>
               </p>
-              <div className="bg-yellow-950/30 border border-yellow-700/30 rounded p-3 text-xs font-mono text-yellow-200/90">
-                <p className="mb-2">Open browser console and run:</p>
-                <code className="block">
-                  localStorage.setItem('discogs_token', 'YOUR_TOKEN_HERE');
-                </code>
-                <p className="mt-2 text-yellow-200/70">
-                  Then refresh the page.
-                </p>
-              </div>
+
+              {!showTokenInput ? (
+                <Button
+                  onClick={() => setShowTokenInput(true)}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                >
+                  Configure Token
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      type="password"
+                      value={tokenInput}
+                      onChange={(e) => setTokenInput(e.target.value)}
+                      placeholder="Paste your Discogs token here"
+                      className="flex-1 bg-yellow-950/30 border-yellow-700/50 text-yellow-100 placeholder:text-yellow-400/50"
+                      onKeyPress={(e) => e.key === 'Enter' && handleSaveToken()}
+                    />
+                    <Button
+                      onClick={handleSaveToken}
+                      className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                    >
+                      Save
+                    </Button>
+                  </div>
+                  <p className="text-xs text-yellow-200/70">
+                    Your token will be stored locally in your browser
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </Card>

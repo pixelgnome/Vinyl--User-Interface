@@ -133,9 +133,14 @@ class DiscogsAPI {
     // Initialize with credentials from .env file (if available)
     // These can be overridden by calling setToken() or setConsumerCredentials()
     const env = (import.meta as any).env;
-    this.token = env?.VITE_DISCOGS_TOKEN || null;
-    this.consumerKey = env?.VITE_DISCOGS_CONSUMER_KEY || null;
-    this.consumerSecret = env?.VITE_DISCOGS_CONSUMER_SECRET || null;
+
+    // Try environment variable first, then fall back to localStorage
+    this.token = env?.VITE_DISCOGS_TOKEN ||
+                 (typeof localStorage !== 'undefined' ? localStorage.getItem('discogs_token') : null);
+    this.consumerKey = env?.VITE_DISCOGS_CONSUMER_KEY ||
+                       (typeof localStorage !== 'undefined' ? localStorage.getItem('discogs_consumer_key') : null);
+    this.consumerSecret = env?.VITE_DISCOGS_CONSUMER_SECRET ||
+                          (typeof localStorage !== 'undefined' ? localStorage.getItem('discogs_consumer_secret') : null);
   }
 
   /**
@@ -152,9 +157,33 @@ class DiscogsAPI {
 
   /**
    * Check if API is configured
+   * This method checks both instance variables and localStorage dynamically
    */
   isConfigured(): boolean {
-    return !!(this.token || (this.consumerKey && this.consumerSecret));
+    // Check instance variables first
+    if (this.token || (this.consumerKey && this.consumerSecret)) {
+      return true;
+    }
+
+    // Dynamically check localStorage as a fallback
+    if (typeof localStorage !== 'undefined') {
+      const storedToken = localStorage.getItem('discogs_token');
+      const storedKey = localStorage.getItem('discogs_consumer_key');
+      const storedSecret = localStorage.getItem('discogs_consumer_secret');
+
+      // If we find credentials in localStorage, load them into the instance
+      if (storedToken) {
+        this.token = storedToken;
+        return true;
+      }
+      if (storedKey && storedSecret) {
+        this.consumerKey = storedKey;
+        this.consumerSecret = storedSecret;
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
